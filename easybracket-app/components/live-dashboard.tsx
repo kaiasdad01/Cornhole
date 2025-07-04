@@ -13,43 +13,20 @@ interface Tournament {
   date: string
   location: string
   teams: Array<{ id: string; name: string; players: string[] }>
+  matches?: Array<{
+    id: string
+    team1: string
+    team2: string
+    score1: number
+    score2: number
+    status: "completed" | "in-progress" | "upcoming"
+    round: string
+  }>
 }
 
 interface LiveDashboardProps {
   tournament: Tournament
 }
-
-// Sample data for demonstration
-const sampleMatches = [
-  {
-    id: 1,
-    team1: "Sarah & Mike",
-    team2: "Alex & Jamie",
-    score1: 21,
-    score2: 18,
-    status: "completed",
-    round: "Round 1",
-  },
-  {
-    id: 2,
-    team1: "Chris & Dana",
-    team2: "Taylor & Jordan",
-    score1: 15,
-    score2: 21,
-    status: "completed",
-    round: "Round 1",
-  },
-  {
-    id: 3,
-    team1: "Casey & Riley",
-    team2: "Morgan & Avery",
-    score1: 0,
-    score2: 0,
-    status: "in-progress",
-    round: "Round 1",
-  },
-  { id: 4, team1: "Quinn & Blake", team2: "Sage & River", score1: 0, score2: 0, status: "upcoming", round: "Round 1" },
-]
 
 const pointDifferentialData = [
   { team: "Sarah & Mike", differential: 3 },
@@ -68,9 +45,11 @@ const tournamentProgressData = [
 export function LiveDashboard({ tournament }: LiveDashboardProps) {
   const [selectedView, setSelectedView] = useState<"overview" | "bracket" | "stats">("overview")
 
-  const completedMatches = sampleMatches.filter((m) => m.status === "completed")
-  const inProgressMatches = sampleMatches.filter((m) => m.status === "in-progress")
-  const upcomingMatches = sampleMatches.filter((m) => m.status === "upcoming")
+  // Use actual tournament data instead of sample data
+  const matches = tournament.matches || []
+  const completedMatches = matches.filter((m) => m.status === "completed")
+  const inProgressMatches = matches.filter((m) => m.status === "in-progress")
+  const upcomingMatches = matches.filter((m) => m.status === "upcoming")
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 p-4">
@@ -124,7 +103,7 @@ export function LiveDashboard({ tournament }: LiveDashboardProps) {
                   <div className="flex items-center gap-2">
                     <Trophy className="h-5 w-5 text-orange-600" />
                     <div>
-                      <div className="text-2xl font-bold text-orange-600">2</div>
+                      <div className="text-2xl font-bold text-orange-600">{completedMatches.length}</div>
                       <div className="text-sm text-gray-600">Matches Completed</div>
                     </div>
                   </div>
@@ -135,7 +114,7 @@ export function LiveDashboard({ tournament }: LiveDashboardProps) {
                   <div className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-blue-600" />
                     <div>
-                      <div className="text-2xl font-bold text-blue-600">1</div>
+                      <div className="text-2xl font-bold text-blue-600">{inProgressMatches.length}</div>
                       <div className="text-sm text-gray-600">In Progress</div>
                     </div>
                   </div>
@@ -157,7 +136,9 @@ export function LiveDashboard({ tournament }: LiveDashboardProps) {
                   <div className="flex items-center gap-2">
                     <Target className="h-5 w-5 text-purple-600" />
                     <div>
-                      <div className="text-2xl font-bold text-purple-600">25%</div>
+                      <div className="text-2xl font-bold text-purple-600">
+                        {matches.length > 0 ? Math.round((completedMatches.length / matches.length) * 100) : 0}%
+                      </div>
                       <div className="text-sm text-gray-600">Tournament Progress</div>
                     </div>
                   </div>
@@ -198,7 +179,7 @@ export function LiveDashboard({ tournament }: LiveDashboardProps) {
                           <div className="font-medium">{match.team2}</div>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-bold">
+                          <div className="text-2xl font-bold text-yellow-600">
                             {match.score1} - {match.score2}
                           </div>
                           <div className="text-sm text-gray-600">{match.round}</div>
@@ -271,29 +252,38 @@ export function LiveDashboard({ tournament }: LiveDashboardProps) {
             {/* Upcoming Matches */}
             <Card>
               <CardHeader>
-                <CardTitle>Upcoming Matches</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-blue-600" />
+                  Upcoming Matches
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {upcomingMatches.map((match) => (
-                    <div
-                      key={match.id}
-                      className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium">{match.team1}</span>
-                          <span className="text-sm text-gray-500">vs</span>
-                          <span className="font-medium">{match.team2}</span>
+                {upcomingMatches.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No upcoming matches scheduled</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {upcomingMatches.map((match) => (
+                      <div
+                        key={match.id}
+                        className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg"
+                      >
+                        <div className="flex-1">
+                          <div className="font-medium">{match.team1}</div>
+                          <div className="text-sm text-gray-600">vs</div>
+                          <div className="font-medium">{match.team2}</div>
                         </div>
-                        <div className="text-sm text-gray-600">{match.round}</div>
+                        <div className="text-right">
+                          <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                            {match.round}
+                          </Badge>
+                        </div>
                       </div>
-                      <Badge variant="outline" className="border-blue-300 text-blue-700">
-                        Scheduled
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </>
@@ -305,11 +295,11 @@ export function LiveDashboard({ tournament }: LiveDashboardProps) {
               <CardTitle>Tournament Bracket</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-gray-50 p-8 rounded-lg">
-                <div className="text-center text-gray-500 py-12">
-                  <Trophy className="h-20 w-20 mx-auto mb-6 opacity-30" />
-                  <p className="text-xl font-medium mb-2">Interactive Bracket View</p>
-                  <p className="text-sm">Full tournament bracket with live score updates</p>
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="text-center text-gray-500 py-8">
+                  <Trophy className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                  <p className="text-lg font-medium">Bracket view coming soon</p>
+                  <p className="text-sm">Tournament bracket visualization will be available here</p>
                 </div>
               </div>
             </CardContent>

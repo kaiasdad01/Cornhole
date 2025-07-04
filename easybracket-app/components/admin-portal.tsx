@@ -15,58 +15,29 @@ interface Tournament {
   date: string
   location: string
   teams: Array<{ id: string; name: string; players: string[] }>
+  matches?: Array<{
+    id: string
+    team1: string
+    team2: string
+    score1: number
+    score2: number
+    status: "completed" | "in-progress" | "upcoming"
+    round: string
+    time?: string
+    court?: string
+    weather?: string
+    notes?: string
+  }>
 }
 
 interface AdminPortalProps {
   tournament: Tournament
 }
 
-// Sample matches for admin management
-const sampleMatches = [
-  {
-    id: 1,
-    team1: "Sarah & Mike",
-    team2: "Alex & Jamie",
-    score1: 21,
-    score2: 18,
-    status: "completed",
-    round: "Round 1",
-    time: "2:30 PM",
-    court: "Court A",
-    weather: "sunny",
-    notes: "Great match, close finish",
-  },
-  {
-    id: 2,
-    team1: "Chris & Dana",
-    team2: "Taylor & Jordan",
-    score1: 15,
-    score2: 21,
-    status: "completed",
-    round: "Round 1",
-    time: "3:00 PM",
-    court: "Court B",
-    weather: "cloudy",
-    notes: "",
-  },
-  {
-    id: 3,
-    team1: "Casey & Riley",
-    team2: "Morgan & Avery",
-    score1: 12,
-    score2: 8,
-    status: "in-progress",
-    round: "Round 1",
-    time: "3:30 PM",
-    court: "Court A",
-    weather: "sunny",
-    notes: "",
-  },
-]
-
 export function AdminPortal({ tournament }: AdminPortalProps) {
   const [selectedMatch, setSelectedMatch] = useState<any>(null)
   const [editingMatch, setEditingMatch] = useState<any>(null)
+  const [matches, setMatches] = useState(tournament.matches || [])
 
   const startEditMatch = (match: any) => {
     setEditingMatch({ ...match })
@@ -74,10 +45,36 @@ export function AdminPortal({ tournament }: AdminPortalProps) {
   }
 
   const saveMatch = () => {
+    if (!editingMatch) return
+    
+    // Update the matches array
+    const updatedMatches = matches.map(match => 
+      match.id === editingMatch.id ? editingMatch : match
+    )
+    setMatches(updatedMatches)
+    
     // In a real app, this would save to the backend
     console.log("Saving match:", editingMatch)
     setEditingMatch(null)
     setSelectedMatch(null)
+  }
+
+  const createNewMatch = () => {
+    const newMatch = {
+      id: Date.now().toString(),
+      team1: "",
+      team2: "",
+      score1: 0,
+      score2: 0,
+      status: "upcoming" as const,
+      round: "Round 1",
+      time: "",
+      court: "Court A",
+      weather: "sunny",
+      notes: "",
+    }
+    setEditingMatch(newMatch)
+    setSelectedMatch(newMatch)
   }
 
   const getWeatherIcon = (weather: string) => {
@@ -111,79 +108,97 @@ export function AdminPortal({ tournament }: AdminPortalProps) {
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle>Match Management</CardTitle>
-                <CardDescription>Click on any match to edit scores, times, and notes</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Match Management</CardTitle>
+                    <CardDescription>Click on any match to edit scores, times, and notes</CardDescription>
+                  </div>
+                  <Button onClick={createNewMatch} size="sm">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Match
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {sampleMatches.map((match) => (
-                    <div
-                      key={match.id}
-                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                        selectedMatch?.id === match.id
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                      }`}
-                      onClick={() => setSelectedMatch(match)}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            variant={
-                              match.status === "completed"
-                                ? "default"
+                {matches.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No matches scheduled yet</p>
+                    <p className="text-sm">Click "Add Match" to create the first match</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {matches.map((match) => (
+                      <div
+                        key={match.id}
+                        className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                          selectedMatch?.id === match.id
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                        }`}
+                        onClick={() => setSelectedMatch(match)}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant={
+                                match.status === "completed"
+                                  ? "default"
+                                  : match.status === "in-progress"
+                                    ? "secondary"
+                                    : "outline"
+                              }
+                            >
+                              {match.status === "completed"
+                                ? "Final"
                                 : match.status === "in-progress"
-                                  ? "secondary"
-                                  : "outline"
-                            }
+                                  ? "Live"
+                                  : "Scheduled"}
+                            </Badge>
+                            <span className="text-sm text-gray-600">{match.round}</span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              startEditMatch(match)
+                            }}
                           >
-                            {match.status === "completed"
-                              ? "Final"
-                              : match.status === "in-progress"
-                                ? "Live"
-                                : "Scheduled"}
-                          </Badge>
-                          <span className="text-sm text-gray-600">{match.round}</span>
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            startEditMatch(match)
-                          }}
-                        >
-                          <Edit3 className="h-4 w-4" />
-                        </Button>
-                      </div>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="font-medium">{match.team1}</div>
-                          <div className="text-sm text-gray-600">vs</div>
-                          <div className="font-medium">{match.team2}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-xl font-bold">
-                            {match.score1} - {match.score2}
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium">{match.team1}</div>
+                            <div className="text-sm text-gray-600">vs</div>
+                            <div className="font-medium">{match.team2}</div>
                           </div>
-                          <div className="text-sm text-gray-600 flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {match.time}
+                          <div className="text-right">
+                            <div className="text-xl font-bold">
+                              {match.score1} - {match.score2}
+                            </div>
+                            {match.time && (
+                              <div className="text-sm text-gray-600 flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {match.time}
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </div>
 
-                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          {getWeatherIcon(match.weather)}
-                          <span>{match.court}</span>
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            {match.weather && getWeatherIcon(match.weather)}
+                            <span>{match.court}</span>
+                          </div>
+                          {match.notes && <div className="text-xs text-gray-500 max-w-xs truncate">{match.notes}</div>}
                         </div>
-                        {match.notes && <div className="text-xs text-gray-500 max-w-xs truncate">{match.notes}</div>}
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -198,89 +213,88 @@ export function AdminPortal({ tournament }: AdminPortalProps) {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Teams</Label>
-                    <div className="text-sm font-medium">
-                      {editingMatch.team1} vs {editingMatch.team2}
-                    </div>
+                    <Label htmlFor="team1">Team 1</Label>
+                    <Input
+                      id="team1"
+                      value={editingMatch.team1}
+                      onChange={(e) => setEditingMatch({ ...editingMatch, team1: e.target.value })}
+                    />
                   </div>
-
+                  <div className="space-y-2">
+                    <Label htmlFor="team2">Team 2</Label>
+                    <Input
+                      id="team2"
+                      value={editingMatch.team2}
+                      onChange={(e) => setEditingMatch({ ...editingMatch, team2: e.target.value })}
+                    />
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-2">
-                      <Label htmlFor="score1">{editingMatch.team1.split(" ")[0]} Score</Label>
+                      <Label htmlFor="score1">Score 1</Label>
                       <Input
                         id="score1"
                         type="number"
                         value={editingMatch.score1}
-                        onChange={(e) =>
-                          setEditingMatch({
-                            ...editingMatch,
-                            score1: Number.parseInt(e.target.value) || 0,
-                          })
-                        }
+                        onChange={(e) => setEditingMatch({ ...editingMatch, score1: parseInt(e.target.value) || 0 })}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="score2">{editingMatch.team2.split(" ")[0]} Score</Label>
+                      <Label htmlFor="score2">Score 2</Label>
                       <Input
                         id="score2"
                         type="number"
                         value={editingMatch.score2}
-                        onChange={(e) =>
-                          setEditingMatch({
-                            ...editingMatch,
-                            score2: Number.parseInt(e.target.value) || 0,
-                          })
-                        }
+                        onChange={(e) => setEditingMatch({ ...editingMatch, score2: parseInt(e.target.value) || 0 })}
                       />
                     </div>
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="time">Match Time</Label>
-                    <Input
-                      id="time"
-                      value={editingMatch.time}
-                      onChange={(e) =>
-                        setEditingMatch({
-                          ...editingMatch,
-                          time: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="court">Court</Label>
+                    <Label htmlFor="status">Status</Label>
                     <Select
-                      value={editingMatch.court}
-                      onValueChange={(value) =>
-                        setEditingMatch({
-                          ...editingMatch,
-                          court: value,
-                        })
-                      }
+                      value={editingMatch.status}
+                      onValueChange={(value) => setEditingMatch({ ...editingMatch, status: value })}
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Court A">Court A</SelectItem>
-                        <SelectItem value="Court B">Court B</SelectItem>
-                        <SelectItem value="Court C">Court C</SelectItem>
+                        <SelectItem value="upcoming">Scheduled</SelectItem>
+                        <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-
+                  <div className="space-y-2">
+                    <Label htmlFor="round">Round</Label>
+                    <Input
+                      id="round"
+                      value={editingMatch.round}
+                      onChange={(e) => setEditingMatch({ ...editingMatch, round: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="time">Time</Label>
+                    <Input
+                      id="time"
+                      value={editingMatch.time || ""}
+                      onChange={(e) => setEditingMatch({ ...editingMatch, time: e.target.value })}
+                      placeholder="e.g., 2:30 PM"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="court">Court</Label>
+                    <Input
+                      id="court"
+                      value={editingMatch.court || ""}
+                      onChange={(e) => setEditingMatch({ ...editingMatch, court: e.target.value })}
+                      placeholder="e.g., Court A"
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="weather">Weather</Label>
                     <Select
-                      value={editingMatch.weather}
-                      onValueChange={(value) =>
-                        setEditingMatch({
-                          ...editingMatch,
-                          weather: value,
-                        })
-                      }
+                      value={editingMatch.weather || "sunny"}
+                      onValueChange={(value) => setEditingMatch({ ...editingMatch, weather: value })}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -292,26 +306,19 @@ export function AdminPortal({ tournament }: AdminPortalProps) {
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="notes">Match Notes</Label>
+                    <Label htmlFor="notes">Notes</Label>
                     <Textarea
                       id="notes"
-                      placeholder="Add any notes about this match..."
-                      value={editingMatch.notes}
-                      onChange={(e) =>
-                        setEditingMatch({
-                          ...editingMatch,
-                          notes: e.target.value,
-                        })
-                      }
+                      value={editingMatch.notes || ""}
+                      onChange={(e) => setEditingMatch({ ...editingMatch, notes: e.target.value })}
+                      placeholder="Add match notes..."
                     />
                   </div>
-
                   <div className="flex gap-2">
                     <Button onClick={saveMatch} className="flex-1">
                       <Save className="mr-2 h-4 w-4" />
-                      Save
+                      Save Match
                     </Button>
                     <Button
                       variant="outline"
@@ -325,156 +332,23 @@ export function AdminPortal({ tournament }: AdminPortalProps) {
                   </div>
                 </CardContent>
               </Card>
-            ) : selectedMatch ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Match Details</CardTitle>
-                  <CardDescription>
-                    {selectedMatch.team1} vs {selectedMatch.team2}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold mb-2">
-                      {selectedMatch.score1} - {selectedMatch.score2}
-                    </div>
-                    <Badge
-                      variant={
-                        selectedMatch.status === "completed"
-                          ? "default"
-                          : selectedMatch.status === "in-progress"
-                            ? "secondary"
-                            : "outline"
-                      }
-                    >
-                      {selectedMatch.status === "completed"
-                        ? "Final"
-                        : selectedMatch.status === "in-progress"
-                          ? "Live"
-                          : "Scheduled"}
-                    </Badge>
-                  </div>
-
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Round:</span>
-                      <span className="font-medium">{selectedMatch.round}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Time:</span>
-                      <span className="font-medium">{selectedMatch.time}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Court:</span>
-                      <span className="font-medium">{selectedMatch.court}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Weather:</span>
-                      <div className="flex items-center gap-1">
-                        {getWeatherIcon(selectedMatch.weather)}
-                        <span className="capitalize">{selectedMatch.weather}</span>
-                      </div>
-                    </div>
-                    {selectedMatch.notes && (
-                      <div className="pt-2 border-t border-gray-100">
-                        <span className="text-gray-600 text-xs">Notes:</span>
-                        <p className="text-sm mt-1">{selectedMatch.notes}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <Button onClick={() => startEditMatch(selectedMatch)} className="w-full">
-                    <Edit3 className="mr-2 h-4 w-4" />
-                    Edit Match
-                  </Button>
-                </CardContent>
-              </Card>
             ) : (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Quick Actions</CardTitle>
-                  <CardDescription>Select a match to edit or use quick actions</CardDescription>
+                  <CardTitle className="text-lg">Match Details</CardTitle>
+                  <CardDescription>Select a match to edit</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button className="w-full bg-transparent" variant="outline">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add New Match
-                  </Button>
-                  <Button className="w-full bg-transparent" variant="outline">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Tournament Settings
-                  </Button>
-                  <Button className="w-full bg-transparent" variant="outline">
-                    <Save className="mr-2 h-4 w-4" />
-                    Export Results
-                  </Button>
+                <CardContent>
+                  <div className="text-center py-8 text-gray-500">
+                    <Edit3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No match selected</p>
+                    <p className="text-sm">Click on a match from the list to edit</p>
+                  </div>
                 </CardContent>
               </Card>
             )}
           </div>
         </div>
-
-        {/* Tournament Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Tournament Settings</CardTitle>
-            <CardDescription>Manage global tournament settings and preferences</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label>Default Match Duration</Label>
-                <Select defaultValue="30">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="20">20 minutes</SelectItem>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="45">45 minutes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Scoring System</Label>
-                <Select defaultValue="21">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="21">First to 21</SelectItem>
-                    <SelectItem value="15">First to 15</SelectItem>
-                    <SelectItem value="11">First to 11</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Auto-advance Winners</Label>
-                <Select defaultValue="yes">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="yes">Yes</SelectItem>
-                    <SelectItem value="no">No</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Live Updates</Label>
-                <Select defaultValue="enabled">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="enabled">Enabled</SelectItem>
-                    <SelectItem value="disabled">Disabled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )

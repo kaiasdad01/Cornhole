@@ -92,3 +92,33 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Ensure buttons are clickable */
+button, [role="button"] {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+/* Fix any potential z-index issues with cards and overlays */
+.card {
+  position: relative;
+  z-index: 0;
+}
+
+/* Ensure proper stacking context for interactive elements */
+[data-radix-popper-content-wrapper] {
+  z-index: 50;
+}
+
+/* Fix pointer events for clickable elements */
+.cursor-pointer {
+  pointer-events: auto;
+}
+
+/* Ensure proper focus states */
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
