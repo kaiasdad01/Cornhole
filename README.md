@@ -37,7 +37,7 @@ A modern, user-friendly tournament management application built with Next.js, de
 
 2. **Install dependencies**
    ```bash
-   cd "Front End UI/easybracket-tournament-app"
+   cd easybracket-app
    npm install
    ```
 
@@ -60,13 +60,12 @@ A modern, user-friendly tournament management application built with Next.js, de
 
 ```
 cornhole/
-├── Front End UI/
-│   └── easybracket-tournament-app/
-│       ├── app/                    # Next.js app directory
-│       ├── components/             # React components
-│       ├── lib/                    # Utilities and services
-│       ├── hooks/                  # Custom React hooks
-│       └── styles/                 # Global styles
+├── easybracket-app/                # Next.js app directory
+│   ├── app/                        # Next.js app directory
+│   ├── components/                 # React components
+│   ├── lib/                        # Utilities and services
+│   ├── hooks/                      # Custom React hooks
+│   └── styles/                     # Global styles
 ├── .gitignore
 └── README.md
 ```
@@ -86,7 +85,7 @@ cornhole/
 
 1. Push your code to GitHub
 2. Connect your repository to Vercel
-3. Set the **Root Directory** to: `Front End UI/easybracket-tournament-app`
+3. Set the **Root Directory** to: `easybracket-app`
 4. Add environment variables in Vercel dashboard
 5. Deploy!
 
