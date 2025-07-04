@@ -19,9 +19,10 @@ interface TeamEntryProps {
   tournament: Tournament
   setTournament: (tournament: Tournament) => void
   onNext: () => void
+  isAdmin?: boolean
 }
 
-export function TeamEntry({ tournament, setTournament, onNext }: TeamEntryProps) {
+export function TeamEntry({ tournament, setTournament, onNext, isAdmin = false }: TeamEntryProps) {
   const [player1, setPlayer1] = useState("")
   const [player2, setPlayer2] = useState("")
   const [teamName, setTeamName] = useState("")
@@ -98,120 +99,127 @@ export function TeamEntry({ tournament, setTournament, onNext }: TeamEntryProps)
           <p className="text-gray-600">{tournament.name}</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Team Entry Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-blue-600" />
-                Add Team
-              </CardTitle>
-              <CardDescription>Enter both players to create a team</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="player1">Player 1</Label>
-                <Input
-                  id="player1"
-                  placeholder="Enter player name"
-                  value={player1}
-                  onChange={(e) => setPlayer1(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="player2">Player 2</Label>
-                <Input
-                  id="player2"
-                  placeholder="Enter player name"
-                  value={player2}
-                  onChange={(e) => setPlayer2(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="teamName">Team Name (Optional)</Label>
-                <Input
-                  id="teamName"
-                  placeholder={player1 && player2 ? `${player1} / ${player2}` : "Custom team name"}
-                  value={teamName}
-                  onChange={(e) => setTeamName(e.target.value)}
-                />
-              </div>
-              <Button
-                onClick={addTeam}
-                className="w-full bg-blue-600 hover:bg-blue-700"
-                disabled={!player1.trim() || !player2.trim()}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Team
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Solo Players Pool */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shuffle className="h-5 w-5 text-orange-600" />
-                Solo Players Pool
-              </CardTitle>
-              <CardDescription>Add individual players to auto-group into teams</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Enter player name"
-                  value={newSoloPlayer}
-                  onChange={(e) => setNewSoloPlayer(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && addSoloPlayer()}
-                />
-                <Button onClick={addSoloPlayer} disabled={!newSoloPlayer.trim()} size="sm">
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {soloPlayers.length > 0 && (
-                <div className="space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    {soloPlayers.map((player, index) => (
-                      <Badge key={index} variant="secondary" className="px-3 py-1">
-                        {player}
-                        <button
-                          onClick={() => setSoloPlayers(soloPlayers.filter((_, i) => i !== index))}
-                          className="ml-2 text-gray-500 hover:text-red-500"
-                        >
-                          ×
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-
-                  {soloPlayers.length >= 2 && (
-                    <Button
-                      onClick={autoGroupSoloPlayers}
-                      variant="outline"
-                      className="w-full border-orange-300 text-orange-700 hover:bg-orange-50 bg-transparent"
-                    >
-                      <Shuffle className="mr-2 h-4 w-4" />
-                      Auto-Group into Teams ({Math.floor(soloPlayers.length / 2)} teams)
-                    </Button>
-                  )}
+        {isAdmin && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Team Entry Form */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-blue-600" />
+                  Add Team
+                </CardTitle>
+                <CardDescription>Enter both players to create a team</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="player1">Player 1</Label>
+                  <Input
+                    id="player1"
+                    placeholder="Enter player name"
+                    value={player1}
+                    onChange={(e) => setPlayer1(e.target.value)}
+                  />
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                <div className="space-y-2">
+                  <Label htmlFor="player2">Player 2</Label>
+                  <Input
+                    id="player2"
+                    placeholder="Enter player name"
+                    value={player2}
+                    onChange={(e) => setPlayer2(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="teamName">Team Name (Optional)</Label>
+                  <Input
+                    id="teamName"
+                    placeholder={player1 && player2 ? `${player1} / ${player2}` : "Custom team name"}
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                  />
+                </div>
+                <Button
+                  onClick={addTeam}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  disabled={!player1.trim() || !player2.trim()}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Team
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Solo Players Pool */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shuffle className="h-5 w-5 text-orange-600" />
+                  Solo Players Pool
+                </CardTitle>
+                <CardDescription>Add individual players to auto-group into teams</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter player name"
+                    value={newSoloPlayer}
+                    onChange={(e) => setNewSoloPlayer(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && addSoloPlayer()}
+                  />
+                  <Button onClick={addSoloPlayer} disabled={!newSoloPlayer.trim()} size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {soloPlayers.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      {soloPlayers.map((player, index) => (
+                        <Badge key={index} variant="secondary" className="px-3 py-1">
+                          {player}
+                          <button
+                            onClick={() => setSoloPlayers(soloPlayers.filter((_, i) => i !== index))}
+                            className="ml-2 text-gray-500 hover:text-red-500"
+                          >
+                            ×
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+
+                    {soloPlayers.length >= 2 && (
+                      <Button
+                        onClick={autoGroupSoloPlayers}
+                        variant="outline"
+                        className="w-full border-orange-300 text-orange-700 hover:bg-orange-50 bg-transparent"
+                      >
+                        <Shuffle className="mr-2 h-4 w-4" />
+                        Auto-Group into Teams ({Math.floor(soloPlayers.length / 2)} teams)
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Teams List */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Registered Teams ({tournament.teams.length})</span>
-              {tournament.teams.length > 0 && (
+              {tournament.teams.length > 0 && isAdmin && (
                 <Button onClick={onNext} className="bg-green-600 hover:bg-green-700">
                   Create Bracket →
                 </Button>
               )}
             </CardTitle>
+            {!isAdmin && (
+              <CardDescription className="text-blue-600">
+                👁️ Public View - You can see all registered teams but cannot make changes
+              </CardDescription>
+            )}
           </CardHeader>
           <CardContent>
             {tournament.teams.length === 0 ? (
@@ -231,19 +239,21 @@ export function TeamEntry({ tournament, setTournament, onNext }: TeamEntryProps)
                       <div className="font-medium text-gray-900">{team.name}</div>
                       <div className="text-sm text-gray-600">{team.players.join(" & ")}</div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" className="text-gray-500 hover:text-blue-600">
-                        <Edit3 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-500 hover:text-red-600"
-                        onClick={() => removeTeam(team.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    {isAdmin && (
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="sm" className="text-gray-500 hover:text-blue-600">
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-500 hover:text-red-600"
+                          onClick={() => removeTeam(team.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

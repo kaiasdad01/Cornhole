@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useLocalStorage } from "@/hooks/useLocalStorage"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -14,6 +15,7 @@ import { AdminPortal } from "@/components/admin-portal"
 import { PostTournamentReport } from "@/components/post-tournament-report"
 import { EmailAuth } from "@/components/email-auth"
 import { CreateTournament } from "@/components/create-tournament"
+import { ShareTournament } from "@/components/share-tournament"
 import { toast } from "sonner"
 import { Toaster } from "@/components/ui/toaster"
 
@@ -21,10 +23,11 @@ type Page = "home" | "teams" | "bracket" | "live" | "admin" | "report" | "create
 
 export default function EasyBracketApp() {
   const [currentPage, setCurrentPage] = useState<Page>("home")
-  const [tournament, setTournament] = useState<any>(null)
+  const [tournament, setTournament] = useLocalStorage<any>('easybracket-tournament', null)
   const [user, setUser] = useState<any>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [viewMode, setViewMode] = useState<'admin' | 'public'>('public')
 
   useEffect(() => {
     console.log('App initializing...')
@@ -129,6 +132,13 @@ export default function EasyBracketApp() {
     setCurrentPage("home")
   }
 
+  const updateTournament = (updates: any) => {
+    setTournament((prev: any) => ({
+      ...prev,
+      ...updates
+    }))
+  }
+
   const signOut = async () => {
     if (!supabase) {
       // Development mode signout
@@ -161,6 +171,7 @@ export default function EasyBracketApp() {
         tournament={tournament} 
         setTournament={setTournament} 
         onNext={() => setCurrentPage("bracket")}
+        isAdmin={viewMode === "admin" && isAdmin}
       />
     )
   }
@@ -175,7 +186,7 @@ export default function EasyBracketApp() {
   }
 
   if (currentPage === "live") {
-    return <LiveDashboard tournament={tournament} isAdmin={isAdmin} />
+    return <LiveDashboard tournament={tournament} isAdmin={viewMode === "admin" && isAdmin} />
   }
 
   if (currentPage === "admin") {
@@ -248,6 +259,28 @@ export default function EasyBracketApp() {
             >
               Report
             </Button>
+            
+            {/* View Mode Toggle */}
+            {tournament && (
+              <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+                <Button
+                  variant={viewMode === "public" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("public")}
+                  className="text-xs"
+                >
+                  Public View
+                </Button>
+                <Button
+                  variant={viewMode === "admin" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("admin")}
+                  className="text-xs"
+                >
+                  Admin View
+                </Button>
+              </div>
+            )}
             
             {/* Auth Button */}
             {user ? (
@@ -400,6 +433,11 @@ export default function EasyBracketApp() {
                   <span className="text-sm">New Tournament</span>
                 </Button>
               </div>
+
+              {/* Share Tournament - Only show for admins */}
+              {isAdmin && (
+                <ShareTournament tournament={tournament} />
+              )}
             </>
           )}
         </div>
