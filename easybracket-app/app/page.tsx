@@ -56,44 +56,9 @@ export default function EasyBracketApp() {
     }
   }, [])
 
-  // Separate useEffect for loading demo tournament
-  useEffect(() => {
-    if (!loading && !tournament) {
-      loadDemoTournament()
-    }
-  }, [loading, tournament])
+  // No automatic demo tournament loading - let users create their own
 
-  const loadDemoTournament = async () => {
-    try {
-      // For demo purposes, create a sample tournament
-      // In production, you'd have tournament selection
-      const sampleTournament = {
-        id: '1',
-        name: "Summer Cornhole Championship",
-        date: "July 15-16, 2024",
-        location: "Sunset Beach Park",
-        status: 'setup' as const,
-        bracket_type: 'single-elimination' as const,
-        created_by: 'demo',
-        teams: [
-          { id: '1', name: 'Beach Bums', players: ['John Smith', 'Mike Johnson'] },
-          { id: '2', name: 'Sand Sharks', players: ['Sarah Wilson', 'Tom Davis'] },
-          { id: '3', name: 'Wave Riders', players: ['Lisa Brown', 'Chris Lee'] },
-          { id: '4', name: 'Sunset Squad', players: ['Alex Garcia', 'Emma White'] },
-          { id: '5', name: 'Boardwalk Bandits', players: ['Ryan Miller', 'Jessica Taylor'] },
-          { id: '6', name: 'Coastal Crushers', players: ['David Clark', 'Amanda Rodriguez'] },
-          { id: '7', name: 'Tide Turners', players: ['Kevin Wilson', 'Rachel Green'] },
-          { id: '8', name: 'Ocean Outlaws', players: ['Steve Martin', 'Nicole Adams'] }
-        ],
-        matches: [],
-        solo_players: []
-      }
-      setTournament(sampleTournament)
-    } catch (error) {
-      console.error('Error loading tournament:', error)
-      toast.error("Failed to load tournament")
-    }
-  }
+
 
   const handleAuthSuccess = () => {
     setCurrentPage("home")
