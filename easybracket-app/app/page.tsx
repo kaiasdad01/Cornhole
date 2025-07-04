@@ -43,8 +43,8 @@ export default function EasyBracketApp() {
       }
     )
 
-    // Don't auto-load demo tournament - let user create their own
-    // loadDemoTournament()
+    // Load demo tournament by default so users can explore
+    loadDemoTournament()
 
     return () => subscription.unsubscribe()
   }, [])
@@ -61,7 +61,16 @@ export default function EasyBracketApp() {
         status: 'setup' as const,
         bracket_type: 'single-elimination' as const,
         created_by: 'demo',
-        teams: [],
+        teams: [
+          { id: '1', name: 'Beach Bums', players: ['John Smith', 'Mike Johnson'] },
+          { id: '2', name: 'Sand Sharks', players: ['Sarah Wilson', 'Tom Davis'] },
+          { id: '3', name: 'Wave Riders', players: ['Lisa Brown', 'Chris Lee'] },
+          { id: '4', name: 'Sunset Squad', players: ['Alex Garcia', 'Emma White'] },
+          { id: '5', name: 'Boardwalk Bandits', players: ['Ryan Miller', 'Jessica Taylor'] },
+          { id: '6', name: 'Coastal Crushers', players: ['David Clark', 'Amanda Rodriguez'] },
+          { id: '7', name: 'Tide Turners', players: ['Kevin Wilson', 'Rachel Green'] },
+          { id: '8', name: 'Ocean Outlaws', players: ['Steve Martin', 'Nicole Adams'] }
+        ],
         matches: [],
         solo_players: []
       }
@@ -227,7 +236,6 @@ export default function EasyBracketApp() {
                       onClick={() => setCurrentPage("teams")}
                       className="bg-orange-500 hover:bg-orange-600 text-white h-12"
                       size="lg"
-                      disabled={!isAdmin && tournament.status !== 'setup'}
                     >
                       <Users className="mr-2 h-5 w-5" />
                       {isAdmin ? 'Manage Teams' : 'View Teams'}
@@ -274,7 +282,6 @@ export default function EasyBracketApp() {
                 <Button
                   variant="outline"
                   className="h-20 flex-col gap-2 border-orange-200 hover:bg-orange-50 bg-transparent"
-                  disabled={!isAdmin}
                   onClick={() => setCurrentPage("create-tournament")}
                 >
                   <Plus className="h-6 w-6 text-orange-600" />
