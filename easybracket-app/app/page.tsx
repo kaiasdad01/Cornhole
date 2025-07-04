@@ -54,10 +54,14 @@ export default function EasyBracketApp() {
       // No Supabase - just set loading to false
       setLoading(false)
     }
-    
-    // Load a demo tournament for testing
-    loadDemoTournament()
   }, [])
+
+  // Separate useEffect for loading demo tournament
+  useEffect(() => {
+    if (!loading && !tournament) {
+      loadDemoTournament()
+    }
+  }, [loading, tournament])
 
   const loadDemoTournament = async () => {
     try {
