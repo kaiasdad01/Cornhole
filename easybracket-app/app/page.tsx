@@ -43,8 +43,8 @@ export default function EasyBracketApp() {
       }
     )
 
-    // Load demo tournament by default so users can explore
-    loadDemoTournament()
+    // Don't load any tournament - let user create their own
+    // loadDemoTournament()
 
     return () => subscription.unsubscribe()
   }, [])
@@ -122,9 +122,7 @@ export default function EasyBracketApp() {
                 Create Your First Tournament
               </Button>
               
-              <div className="text-sm text-gray-500">
-                Or <Button variant="link" onClick={loadDemoTournament} className="p-0 h-auto">try the demo tournament</Button> to see how it works
-              </div>
+
             </div>
           </div>
         </div>
