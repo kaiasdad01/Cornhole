@@ -93,69 +93,32 @@ body {
   }
 }
 
-/* Ensure buttons are clickable - AGGRESSIVE FIXES */
-button, 
-[role="button"],
-.btn,
-.button {
-  position: relative !important;
-  z-index: 10 !important;
-  pointer-events: auto !important;
-  cursor: pointer !important;
-  user-select: none !important;
+/* Simple button fixes */
+button, [role="button"] {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
 }
 
 /* Fix any potential z-index issues with cards and overlays */
-.card,
-[class*="card"] {
+.card {
   position: relative;
   z-index: 0;
 }
 
 /* Ensure proper stacking context for interactive elements */
-[data-radix-popper-content-wrapper],
-[data-radix-portal] {
-  z-index: 50 !important;
+[data-radix-popper-content-wrapper] {
+  z-index: 50;
 }
 
 /* Fix pointer events for clickable elements */
-.cursor-pointer,
-[class*="cursor-pointer"] {
-  pointer-events: auto !important;
+.cursor-pointer {
+  pointer-events: auto;
 }
 
 /* Ensure proper focus states */
 button:focus-visible,
-[role="button"]:focus-visible,
-.btn:focus-visible,
-.button:focus-visible {
-  outline: 2px solid hsl(var(--ring)) !important;
-  outline-offset: 2px !important;
-}
-
-/* Override any conflicting styles */
-* {
-  pointer-events: auto !important;
-}
-
-/* Specific fix for button elements */
-button[type="button"],
-button[type="submit"],
-button[type="reset"] {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-}
-
-/* Fix for any overlay issues */
-.overlay,
-[class*="overlay"] {
-  pointer-events: none !important;
-}
-
-/* Ensure buttons work even with overlays */
-button,
-[role="button"] {
-  pointer-events: auto !important;
-  position: relative !important;
-  z-index: 100 !important;
+[role="button"]:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
 }
