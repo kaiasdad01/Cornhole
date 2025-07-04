@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
@@ -18,7 +18,49 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholde
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-function createDemoAuthClient() {
+// Types for the demo implementation
+interface DemoUser {
+  id: string;
+  email: string;
+  password: string;
+}
+
+interface DemoSession {
+  user: DemoUser;
+}
+
+// Subscription handle returned by onAuthStateChange
+interface DemoSubscription {
+  unsubscribe: () => void;
+}
+
+// Shape of the subset of Supabase auth API we mimic
+interface DemoAuth {
+  signUp: (params: { email: string; password: string }) => Promise<
+    { data: { user: DemoUser } | null; error: { message: string } | null }
+  >;
+  signInWithPassword: (
+    params: { email: string; password: string }
+  ) => Promise<
+    { data: { session: DemoSession } | null; error: { message: string } | null }
+  >;
+  signOut: () => Promise<{ error: null }>;
+  getSession: () => Promise<{ data: { session: DemoSession | null } }>;
+  onAuthStateChange: (
+    callback: (event: string, session: DemoSession | null) => void
+  ) => { data: { subscription: DemoSubscription } };
+}
+
+interface DemoSupabaseClient {
+  /** Distinguish demo client at runtime */
+  __isDemo: true;
+  auth: DemoAuth;
+  // Minimal stubs for database / realtime API chains – typed as any for brevity.
+  from: (...args: any[]) => any;
+  channel: (...args: any[]) => any;
+}
+
+function createDemoAuthClient(): DemoSupabaseClient {
   // Helper ──────────────────────────────────────────────────────────────────────
   const readLS = (key: string) => {
     if (typeof window === 'undefined') return null
@@ -34,10 +76,10 @@ function createDemoAuthClient() {
     window.localStorage.setItem(key, JSON.stringify(value))
   }
 
-  type Listener = (event: string, session: any) => void
+  type Listener = (event: string, session: DemoSession | null) => void
   let listeners: Listener[] = []
 
-  const notify = (event: string, session: any) => {
+  const notify = (event: string, session: DemoSession | null) => {
     listeners.forEach((cb) => cb(event, session))
   }
 
@@ -45,22 +87,22 @@ function createDemoAuthClient() {
   const SESSION_KEY = 'demo_session_v1'
 
   // Auth API ────────────────────────────────────────────────────────────────────
-  const signUp = async ({ email, password }: { email: string; password: string }) => {
-    const users: any[] = readLS(USERS_KEY) || []
+  const signUp: DemoAuth["signUp"] = async ({ email, password }) => {
+    const users: DemoUser[] = readLS(USERS_KEY) || []
     if (users.find((u) => u.email === email)) {
       return { data: null, error: { message: 'User already exists' } }
     }
     const user = { id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, email, password }
-    users.push(user)
-    writeLS(USERS_KEY, users)
+    const updatedUsers = [...users, user]
+    writeLS(USERS_KEY, updatedUsers)
 
     // In Supabase, signUp does NOT create a session by default when email
     // confirmation is enabled, so we mimic that behaviour and return no session.
     return { data: { user }, error: null }
   }
 
-  const signInWithPassword = async ({ email, password }: { email: string; password: string }) => {
-    const users: any[] = readLS(USERS_KEY) || []
+  const signInWithPassword: DemoAuth["signInWithPassword"] = async ({ email, password }) => {
+    const users: DemoUser[] = readLS(USERS_KEY) || []
     const user = users.find((u) => u.email === email && u.password === password)
     if (!user) {
       return { data: null, error: { message: 'Invalid email or password' } }
@@ -71,20 +113,18 @@ function createDemoAuthClient() {
     return { data: { session }, error: null }
   }
 
-  const signOut = async () => {
+  const signOut: DemoAuth["signOut"] = async () => {
     writeLS(SESSION_KEY, null)
     notify('SIGNED_OUT', null)
     return { error: null }
   }
 
-  const getSession = async () => {
+  const getSession: DemoAuth["getSession"] = async () => {
     const session = readLS(SESSION_KEY)
     return { data: { session: session || null } }
   }
 
-  const onAuthStateChange = (
-    callback: (event: string, session: any) => void
-  ) => {
+  const onAuthStateChange: DemoAuth["onAuthStateChange"] = (callback) => {
     listeners.push(callback)
     return {
       data: {
@@ -104,8 +144,7 @@ function createDemoAuthClient() {
     return chain
   }
 
-  return {
-    // Mark this so the app can differentiate if needed
+  const demoClient: DemoSupabaseClient = {
     __isDemo: true,
     auth: {
       signUp,
@@ -120,13 +159,17 @@ function createDemoAuthClient() {
         subscribe: () => ({ unsubscribe: () => {} }),
       }),
     }),
-  } as any
+  }
+
+  return demoClient
 }
 
 // --------------------------- EXPORT CLIENT -------------------------------------
 // If credentials are provided we connect to the real backend, otherwise we fall
 // back to the demo auth client.
-export const supabase =
+type RealSupabase = SupabaseClient<any, "public", any>;
+
+export const supabase: RealSupabase | DemoSupabaseClient =
   supabaseUrl !== 'https://placeholder.supabase.co'
     ? createClient(supabaseUrl, supabaseAnonKey)
     : createDemoAuthClient()
