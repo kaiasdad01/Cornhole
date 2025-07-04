@@ -56,6 +56,71 @@ export default function EasyBracketApp() {
   }, [])
 
   const handleAuthSuccess = () => {
+    // If not using Supabase, set admin state manually for development
+    if (!supabase) {
+      setIsAdmin(true)
+      setUser({ id: 'dev-user', email: 'dev@example.com' })
+      
+      // Create sample tournament data if none exists
+      if (!tournament) {
+        const sampleTournament = {
+          id: 'sample-tournament',
+          name: 'Sample Cornhole Tournament',
+          date: new Date().toLocaleDateString(),
+          location: 'Community Center',
+          status: 'active',
+          bracket_type: 'single-elimination',
+          teams: [
+            { id: 'team1', name: 'Team Thunder', players: ['John Doe', 'Jane Smith'] },
+            { id: 'team2', name: 'Team Lightning', players: ['Bob Johnson', 'Sarah Wilson'] },
+            { id: 'team3', name: 'Team Tornado', players: ['Mike Davis', 'Lisa Brown'] },
+            { id: 'team4', name: 'Team Hurricane', players: ['Chris Taylor', 'Amy Martinez'] }
+          ],
+          matches: [
+            {
+              id: 'match1',
+              team1: 'Team Thunder',
+              team2: 'Team Lightning',
+              score1: 21,
+              score2: 18,
+              status: 'completed',
+              round: 'Semifinal',
+              time: '2:00 PM',
+              court: 'Court A',
+              weather: 'sunny',
+              notes: 'Great match!'
+            },
+            {
+              id: 'match2',
+              team1: 'Team Tornado',
+              team2: 'Team Hurricane',
+              score1: 15,
+              score2: 21,
+              status: 'completed',
+              round: 'Semifinal',
+              time: '2:30 PM',
+              court: 'Court B',
+              weather: 'cloudy',
+              notes: 'Close game'
+            },
+            {
+              id: 'match3',
+              team1: 'Team Thunder',
+              team2: 'Team Hurricane',
+              score1: 0,
+              score2: 0,
+              status: 'upcoming',
+              round: 'Final',
+              time: '3:00 PM',
+              court: 'Court A',
+              weather: 'sunny',
+              notes: 'Championship match'
+            }
+          ]
+        }
+        setTournament(sampleTournament)
+      }
+    }
     setCurrentPage("home")
   }
 
@@ -66,7 +131,10 @@ export default function EasyBracketApp() {
 
   const signOut = async () => {
     if (!supabase) {
-      toast.error("Authentication not available")
+      // Development mode signout
+      setUser(null)
+      setIsAdmin(false)
+      toast.success("Signed out successfully! (Development mode)")
       return
     }
     

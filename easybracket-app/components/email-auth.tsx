@@ -24,7 +24,33 @@ export function EmailAuth({ onSuccess }: EmailAuthProps) {
     setLoading(true)
 
     if (!supabase) {
-      toast.error("Authentication not available. Please set up Supabase environment variables.")
+      // Fallback for development when Supabase is not configured
+      console.log("Using development mode authentication")
+      
+      // Simple validation
+      if (!email || !password) {
+        toast.error("Please enter both email and password")
+        setLoading(false)
+        return
+      }
+      
+      if (password.length < 6) {
+        toast.error("Password must be at least 6 characters")
+        setLoading(false)
+        return
+      }
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      if (isSignUp) {
+        toast.success("Account created! (Development mode - no email verification needed)")
+        onSuccess()
+      } else {
+        toast.success("Signed in successfully! (Development mode)")
+        onSuccess()
+      }
+      
       setLoading(false)
       return
     }
