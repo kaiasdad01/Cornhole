@@ -20,7 +20,7 @@ import { Toaster } from "@/components/ui/toaster"
 type Page = "home" | "teams" | "bracket" | "live" | "admin" | "report" | "create-tournament" | "auth"
 
 export default function EasyBracketApp() {
-  const [currentPage, setCurrentPage] = useState<Page>("home")
+  const [currentPage, setCurrentPage] = useState<Page>(() => "home")
   const [tournament, setTournament] = useState<any>(null)
   const [user, setUser] = useState<any>(null)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -144,21 +144,21 @@ export default function EasyBracketApp() {
           </Button>
           <div className="flex items-center gap-2">
             <Button
-              variant={currentPage === "teams" ? "default" : "ghost"}
+              variant={currentPage === ("teams" as Page) ? "default" : "ghost"}
               size="sm"
               onClick={() => setCurrentPage("teams")}
             >
               Teams
             </Button>
             <Button
-              variant={currentPage === "bracket" ? "default" : "ghost"}
+              variant={currentPage === ("bracket" as Page) ? "default" : "ghost"}
               size="sm"
               onClick={() => setCurrentPage("bracket")}
             >
               Bracket
             </Button>
             <Button
-              variant={currentPage === "live" ? "default" : "ghost"}
+              variant={currentPage === ("live" as Page) ? "default" : "ghost"}
               size="sm"
               onClick={() => setCurrentPage("live")}
             >
@@ -166,7 +166,7 @@ export default function EasyBracketApp() {
             </Button>
             {isAdmin && (
               <Button
-                variant={currentPage === "admin" ? "default" : "ghost"}
+                variant={currentPage === ("admin" as Page) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setCurrentPage("admin")}
               >
@@ -174,7 +174,7 @@ export default function EasyBracketApp() {
               </Button>
             )}
             <Button
-              variant={currentPage === "report" ? "default" : "ghost"}
+              variant={currentPage === ("report" as Page) ? "default" : "ghost"}
               size="sm"
               onClick={() => setCurrentPage("report")}
             >
