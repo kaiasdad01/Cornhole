@@ -5,8 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Trophy, Clock, TrendingUp, Users, Target, Zap } from "lucide-react"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer } from "recharts"
 
 interface Tournament {
   name: string
@@ -307,95 +305,20 @@ export function LiveDashboard({ tournament }: LiveDashboardProps) {
         )}
 
         {selectedView === "stats" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Point Differential</CardTitle>
-                <CardDescription>Average point difference per team</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer
-                  config={{
-                    differential: {
-                      label: "Point Differential",
-                      color: "hsl(var(--chart-1))",
-                    },
-                  }}
-                  className="h-[300px]"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={pointDifferentialData}>
-                      <XAxis dataKey="team" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="differential" fill="var(--color-differential)" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Tournament Progress</CardTitle>
-                <CardDescription>Matches completed by round</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer
-                  config={{
-                    completed: {
-                      label: "Completed",
-                      color: "hsl(var(--chart-2))",
-                    },
-                    total: {
-                      label: "Total",
-                      color: "hsl(var(--chart-3))",
-                    },
-                  }}
-                  className="h-[300px]"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={tournamentProgressData}>
-                      <XAxis dataKey="round" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="completed" fill="var(--color-completed)" />
-                      <Bar dataKey="total" fill="var(--color-total)" opacity={0.3} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Projected Winners</CardTitle>
-                <CardDescription>AI-powered predictions based on current performance</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                    <Trophy className="h-8 w-8 mx-auto mb-2 text-yellow-600" />
-                    <div className="font-bold text-lg">Taylor & Jordan</div>
-                    <div className="text-sm text-gray-600">Tournament Winner</div>
-                    <div className="text-xs text-yellow-700 mt-1">65% confidence</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <Trophy className="h-8 w-8 mx-auto mb-2 text-gray-600" />
-                    <div className="font-bold text-lg">Sarah & Mike</div>
-                    <div className="text-sm text-gray-600">Runner-up</div>
-                    <div className="text-xs text-gray-700 mt-1">45% confidence</div>
-                  </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <TrendingUp className="h-8 w-8 mx-auto mb-2 text-orange-600" />
-                    <div className="font-bold text-lg">Casey & Riley</div>
-                    <div className="text-sm text-gray-600">Dark Horse</div>
-                    <div className="text-xs text-orange-700 mt-1">Upset potential</div>
-                  </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Tournament Statistics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="text-center text-gray-500 py-8">
+                  <TrendingUp className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                  <p className="text-lg font-medium">Statistics view coming soon</p>
+                  <p className="text-sm">Detailed tournament statistics will be available here</p>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
