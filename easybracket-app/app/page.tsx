@@ -28,8 +28,11 @@ export default function EasyBracketApp() {
 
 
   useEffect(() => {
+    console.log('App initializing...')
+    
     // Check if Supabase is available
     if (supabase) {
+      console.log('Supabase is available')
       // Check for existing session
       supabase.auth.getSession().then(({ data: { session } }) => {
         setUser(session?.user ?? null)
@@ -47,9 +50,13 @@ export default function EasyBracketApp() {
 
       return () => subscription.unsubscribe()
     } else {
+      console.log('Supabase not available - running in demo mode')
       // No Supabase - just set loading to false
       setLoading(false)
     }
+    
+    // Load a demo tournament for testing
+    loadDemoTournament()
   }, [])
 
   const loadDemoTournament = async () => {
@@ -108,6 +115,8 @@ export default function EasyBracketApp() {
   }
 
   const renderPage = () => {
+    console.log('Rendering page:', currentPage, 'Tournament:', !!tournament)
+    
     if (!tournament) {
       return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 p-4">
@@ -122,7 +131,10 @@ export default function EasyBracketApp() {
             
             <div className="space-y-4">
               <Button
-                onClick={() => setCurrentPage("create-tournament")}
+                onClick={() => {
+                  console.log('Create tournament button clicked!')
+                  setCurrentPage("create-tournament")
+                }}
                 className="bg-orange-500 hover:bg-orange-600 text-white h-14 px-8"
                 size="lg"
               >
@@ -239,7 +251,10 @@ export default function EasyBracketApp() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Button
-                      onClick={() => setCurrentPage("teams")}
+                      onClick={() => {
+                        console.log('Teams button clicked!')
+                        setCurrentPage("teams")
+                      }}
                       className="bg-orange-500 hover:bg-orange-600 text-white h-12"
                       size="lg"
                     >
@@ -247,7 +262,10 @@ export default function EasyBracketApp() {
                       {isAdmin ? 'Manage Teams' : 'View Teams'}
                     </Button>
                     <Button
-                      onClick={() => setCurrentPage("bracket")}
+                      onClick={() => {
+                        console.log('Bracket button clicked!')
+                        setCurrentPage("bracket")
+                      }}
                       variant="outline"
                       className="border-orange-300 text-orange-700 hover:bg-orange-50 h-12"
                       size="lg"
