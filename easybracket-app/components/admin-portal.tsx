@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Settings, Save, Clock, Edit3, Plus, Sun, Cloud, CloudRain } from "lucide-react"
+import { Settings, Save, Clock, Edit3, Plus, Sun, Cloud, CloudRain, Target, Users, Trophy } from "lucide-react"
+import { BracketVisualization } from "./bracket-visualization"
 
 interface Tournament {
   name: string
@@ -38,6 +39,7 @@ export function AdminPortal({ tournament }: AdminPortalProps) {
   const [selectedMatch, setSelectedMatch] = useState<any>(null)
   const [editingMatch, setEditingMatch] = useState<any>(null)
   const [matches, setMatches] = useState(tournament.matches || [])
+  const [selectedView, setSelectedView] = useState<"matches" | "bracket" | "stats">("matches")
 
   const startEditMatch = (match: any) => {
     setEditingMatch({ ...match })
@@ -103,9 +105,52 @@ export function AdminPortal({ tournament }: AdminPortalProps) {
           </Badge>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Match List */}
-          <div className="lg:col-span-2">
+        {/* View Toggle */}
+        <div className="flex justify-center mb-6">
+          <div className="bg-white p-1 rounded-lg border border-gray-200">
+            <Button
+              variant={selectedView === "matches" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setSelectedView("matches")}
+            >
+              Match Management
+            </Button>
+            <Button
+              variant={selectedView === "bracket" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setSelectedView("bracket")}
+            >
+              Bracket View
+            </Button>
+            <Button
+              variant={selectedView === "stats" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setSelectedView("stats")}
+            >
+              Statistics
+            </Button>
+          </div>
+        </div>
+
+        {selectedView === "bracket" && (
+          <div className="w-full">
+            <BracketVisualization 
+              tournament={{ ...tournament, id: tournament.name }}
+              isAdmin={true}
+              onMatchUpdate={(matchId, updates) => {
+                const updatedMatches = matches.map(m => 
+                  m.id === matchId ? { ...m, ...updates } : m
+                )
+                setMatches(updatedMatches)
+              }}
+            />
+          </div>
+        )}
+
+        {selectedView === "matches" && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Match List */}
+            <div className="lg:col-span-2">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -349,6 +394,47 @@ export function AdminPortal({ tournament }: AdminPortalProps) {
             )}
           </div>
         </div>
+        )}
+
+        {selectedView === "stats" && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <Target className="h-8 w-8 text-blue-600" />
+                  <div>
+                    <div className="text-2xl font-bold">{matches.filter(m => m.status === "completed").length}</div>
+                    <div className="text-sm text-gray-600">Matches Completed</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <Users className="h-8 w-8 text-green-600" />
+                  <div>
+                    <div className="text-2xl font-bold">{tournament.teams.length}</div>
+                    <div className="text-sm text-gray-600">Total Teams</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <Trophy className="h-8 w-8 text-orange-600" />
+                  <div>
+                    <div className="text-2xl font-bold">
+                      {matches.length > 0 ? Math.round((matches.filter(m => m.status === "completed").length / matches.length) * 100) : 0}%
+                    </div>
+                    <div className="text-sm text-gray-600">Tournament Progress</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   )

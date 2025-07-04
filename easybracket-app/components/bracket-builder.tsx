@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Trophy, Shuffle, Play, Settings } from "lucide-react"
+import { Trophy, Shuffle, Play, Settings, Eye } from "lucide-react"
+import { BracketVisualization } from "./bracket-visualization"
 
 interface Tournament {
   name: string
@@ -23,6 +24,7 @@ export function BracketBuilder({ tournament, onNext }: BracketBuilderProps) {
   const [bracketType, setBracketType] = useState<string>("single-elimination")
   const [selectedRegion, setSelectedRegion] = useState<string>("")
   const [seededTeams, setSeededTeams] = useState(tournament.teams)
+  const [showBracket, setShowBracket] = useState(false)
 
   const bracketTypes = [
     { value: "single-elimination", label: "Single Elimination", description: "One loss and you're out" },
@@ -51,6 +53,26 @@ export function BracketBuilder({ tournament, onNext }: BracketBuilderProps) {
       ;[newSeeds[index], newSeeds[index + 1]] = [newSeeds[index + 1], newSeeds[index]]
       setSeededTeams(newSeeds)
     }
+  }
+
+  if (showBracket) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 p-4">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <Button variant="outline" onClick={() => setShowBracket(false)}>
+              ← Back to Setup
+            </Button>
+            <h1 className="text-2xl font-bold">Bracket Preview</h1>
+            <div></div>
+          </div>
+          <BracketVisualization 
+            tournament={{ ...tournament, id: tournament.name, teams: seededTeams }}
+            isAdmin={false}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -110,10 +132,20 @@ export function BracketBuilder({ tournament, onNext }: BracketBuilderProps) {
                   </Select>
                 </div>
 
-                <Button onClick={onNext} className="w-full bg-green-600 hover:bg-green-700" size="lg">
-                  <Play className="mr-2 h-4 w-4" />
-                  Start Tournament
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    onClick={() => setShowBracket(true)} 
+                    className="w-full bg-blue-600 hover:bg-blue-700" 
+                    size="lg"
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    Preview Bracket
+                  </Button>
+                  <Button onClick={onNext} className="w-full bg-green-600 hover:bg-green-700" size="lg">
+                    <Play className="mr-2 h-4 w-4" />
+                    Start Tournament
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 

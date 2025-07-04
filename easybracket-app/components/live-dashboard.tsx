@@ -4,9 +4,11 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Trophy, Clock, TrendingUp, Users, Target, Zap } from "lucide-react"
+import { Trophy, Clock, TrendingUp, Users, Target, Zap, BarChart3 } from "lucide-react"
+import { BracketVisualization } from "./bracket-visualization"
 
 interface Tournament {
+  id?: string
   name: string
   date: string
   location: string
@@ -24,6 +26,8 @@ interface Tournament {
 
 interface LiveDashboardProps {
   tournament: Tournament
+  isAdmin?: boolean
+  onMatchUpdate?: (matchId: string, updates: any) => void
 }
 
 const pointDifferentialData = [
@@ -40,7 +44,7 @@ const tournamentProgressData = [
   { round: "F", completed: 0, total: 1 },
 ]
 
-export function LiveDashboard({ tournament }: LiveDashboardProps) {
+export function LiveDashboard({ tournament, isAdmin = false, onMatchUpdate }: LiveDashboardProps) {
   const [selectedView, setSelectedView] = useState<"overview" | "bracket" | "stats">("overview")
 
   // Use actual tournament data instead of sample data
@@ -91,6 +95,14 @@ export function LiveDashboard({ tournament }: LiveDashboardProps) {
             </Button>
           </div>
         </div>
+
+        {selectedView === "bracket" && (
+          <BracketVisualization 
+            tournament={{ ...tournament, id: tournament.id || tournament.name }}
+            isAdmin={isAdmin}
+            onMatchUpdate={onMatchUpdate}
+          />
+        )}
 
         {selectedView === "overview" && (
           <>

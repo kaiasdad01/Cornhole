@@ -107,7 +107,7 @@ export default function EasyBracketApp() {
   }
 
   if (currentPage === "live") {
-    return <LiveDashboard tournament={tournament} />
+    return <LiveDashboard tournament={tournament} isAdmin={isAdmin} />
   }
 
   if (currentPage === "admin") {
