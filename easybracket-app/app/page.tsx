@@ -28,25 +28,28 @@ export default function EasyBracketApp() {
 
 
   useEffect(() => {
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setIsAdmin(!!session?.user)
-      setLoading(false)
-    })
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+    // Check if Supabase is available
+    if (supabase) {
+      // Check for existing session
+      supabase.auth.getSession().then(({ data: { session } }) => {
         setUser(session?.user ?? null)
         setIsAdmin(!!session?.user)
-      }
-    )
+        setLoading(false)
+      })
 
-    // Don't load any tournament - let user create their own
-    // loadDemoTournament()
+      // Listen for auth changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          setUser(session?.user ?? null)
+          setIsAdmin(!!session?.user)
+        }
+      )
 
-    return () => subscription.unsubscribe()
+      return () => subscription.unsubscribe()
+    } else {
+      // No Supabase - just set loading to false
+      setLoading(false)
+    }
   }, [])
 
   const loadDemoTournament = async () => {
@@ -91,6 +94,11 @@ export default function EasyBracketApp() {
   }
 
   const signOut = async () => {
+    if (!supabase) {
+      toast.error("Authentication not available")
+      return
+    }
+    
     try {
       const { error } = await supabase.auth.signOut()
       if (error) throw error

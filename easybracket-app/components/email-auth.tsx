@@ -23,6 +23,12 @@ export function EmailAuth({ onSuccess }: EmailAuthProps) {
     e.preventDefault()
     setLoading(true)
 
+    if (!supabase) {
+      toast.error("Authentication not available. Please set up Supabase environment variables.")
+      setLoading(false)
+      return
+    }
+
     try {
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
