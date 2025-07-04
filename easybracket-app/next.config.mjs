@@ -15,6 +15,8 @@ const nextConfig = {
   },
   // Enable compression
   compress: true,
+  // Vercel-specific optimizations
+  output: 'standalone',
   // Reduce build time by excluding unnecessary files
   webpack: (config, { dev, isServer }) => {
     // Optimize for production builds
