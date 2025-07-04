@@ -5,6 +5,11 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Install the Next.js plugin for Netlify
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Handle client-side routing for SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"
